@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
-    struct CollectiableAttr {
+    struct CollectibleAttr {
         string name;
         string figure;
         uint256 price;
@@ -19,7 +19,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         uint256 totalSupply;
         bool preSale;
     }
-
+    
     constructor() ERC721("LaqiraceNFT", "LRNFT") {
 
     }
