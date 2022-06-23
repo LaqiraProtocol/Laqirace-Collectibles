@@ -40,6 +40,11 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
 
     bytes32[] private collectiblesSigs;
     address[] private quoteTokens;
+
+    event ImportCollectible(string collectibleName, string figure, uint256 price, bytes32 colletibleSig);
+    event UpdateCollectible(string oldCollectibleName, string newCollectibleName,
+    string oldFigure, string newFigure, uint256 oldPrice, uint256 newPrice, bytes32 colletibleSig);
+
     constructor(address _minter, address _mintingFeeAddress) ERC721("LaqiraceNFT", "LRNFT") {
         minter = _minter;
         mintingFeeAddress = _mintingFeeAddress;
@@ -59,6 +64,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
 
         collectiblesSigs.push(collectibleSig);
         collectibleNameToSig[_collectibleName] = collectibleSig;
+        emit ImportCollectible(_collectibleName, _figure, _price, collectibleSig);
         return collectibleSig;
     }
 
@@ -120,12 +126,16 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     string memory _name,
     string memory _figure,
     uint256 _price) public onlyOwner returns (bool) {
+        string memory oldName = collectibleData[_collectibleSig].name;
+        string memory oldFigure = collectibleData[_collectibleSig].figure;
+        uint256 oldPrice = collectibleData[_collectibleSig].price;
         collectibleData[_collectibleSig].name = _name;
         collectibleData[_collectibleSig].figure = _figure;
         collectibleData[_collectibleSig].price = _price;
         
         delete collectibleNameToSig[collectibleData[_collectibleSig].name];
         collectibleNameToSig[_name] = _collectibleSig;
+        emit UpdateCollectible(oldName, _name, oldFigure, _figure, oldPrice, _price, _collectibleSig);
         return true;
     }
 
