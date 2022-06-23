@@ -17,6 +17,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     struct SaleStatus {
         uint256 maxSupply;
         uint256 totalSupply;
+        bool salePermit;
         bool preSale;
     }
 
