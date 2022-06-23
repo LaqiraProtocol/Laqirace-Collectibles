@@ -136,4 +136,9 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         saleData[_collectibleSig].preSale = _preSale;
         return true;
     }
+
+    function updateMinter(address _newMinter) public onlyOwner returns (bool) {
+        minter = _newMinter;
+        return true;
+    }
 }
