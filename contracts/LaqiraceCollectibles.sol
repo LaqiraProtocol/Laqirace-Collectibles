@@ -157,4 +157,8 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         delete qouteToken[_quoteToken];
         return true;
     }
+
+    function getCollectibleData(bytes32 _collectibleSig) public view returns (CollectibleAttr memory) {
+        return collectibleData[_collectibleSig];
+    }
 }
