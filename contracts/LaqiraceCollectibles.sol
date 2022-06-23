@@ -31,7 +31,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     mapping(bytes32 => CollectibleAttr) private collectibleData;
     mapping(bytes32 => SaleStatus) private saleData;
     mapping(address => mapping(bytes32 => bool)) private userPreSaleStatus;
-    mapping(string => bytes32) private collectibleName;
+    mapping(string => bytes32) private collectibleNameToSig;
     mapping(uint256 => TokenIdAttr) private tokenIdData;
 
     address public minter;
@@ -58,7 +58,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         collectibleData[collectibleSig].price = _price;
 
         collectiblesSigs.push(collectibleSig);
-        collectibleName[_collectibleName] = collectibleSig;
+        collectibleNameToSig[_collectibleName] = collectibleSig;
         return collectibleSig;
     }
 
