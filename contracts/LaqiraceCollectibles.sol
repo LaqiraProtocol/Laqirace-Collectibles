@@ -36,6 +36,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
 
     address public minter;
     address public mintingFeeAddress;
+    address public BUSDAddress;
 
     bytes32[] private collectiblesSigs;
     constructor() ERC721("LaqiraceNFT", "LRNFT") {
