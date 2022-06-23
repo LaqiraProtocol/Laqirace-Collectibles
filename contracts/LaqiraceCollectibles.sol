@@ -152,4 +152,9 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         qouteToken[_quoteToken] = true;
         return true;
     }
+
+    function removeQuoteToken(address _quoteToken) public onlyOwner returns (bool) {
+        delete qouteToken[_quoteToken];
+        return true;
+    }
 }
