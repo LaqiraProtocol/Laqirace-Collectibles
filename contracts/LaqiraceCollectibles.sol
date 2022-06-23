@@ -27,6 +27,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     }
 
     mapping(bytes32 => CollectibleAttr) private collectibleData;
+    mapping(bytes32 => SaleStatus) private saleData;
     mapping(address => mapping(bytes32 => bool)) private userPreSaleStatus;
     mapping(string => bytes32) private collectibleName;
     mapping(uint256 => TokenIdAttr) private tokenIdData;
