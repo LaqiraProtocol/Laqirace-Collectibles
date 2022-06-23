@@ -223,6 +223,10 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         return quoteTokens;
     }
 
+    function getMinter() public view returns (address) {
+        return minter;
+    }
+
     function delAddressFromArray(
         address _element,
         address[] storage array
