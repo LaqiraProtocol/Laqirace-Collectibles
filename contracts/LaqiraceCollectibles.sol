@@ -60,8 +60,8 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     }
 
     function mintCollectible(bytes32 _collectibleSig) public {
-        if (_msgSender() == minter) {}
-        else {
+        if (_msgSender() == minter) {
+        } else {
             require(saleData[_collectibleSig].maxSupply == 0 ||
             saleData[_collectibleSig].maxSupply > saleData[_collectibleSig].totalSupply
             , 'Max supply for the collectible was reached');
@@ -70,7 +70,10 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         require(saleData[_collectibleSig].salePermit, 'Minting the collectible is not permitted');
         require(!saleData[_collectibleSig].preSale, 'Minting the collectible is not allowed due to being in presale stage');
 
-        TransferHelper.safeTransferFrom(BUSDAddress, _msgSender(), mintingFeeAddress, collectibleData[_collectibleSig].price);
+        if (_msgSender() == minter) {
+        } else {
+            TransferHelper.safeTransferFrom(BUSDAddress, _msgSender(), mintingFeeAddress, collectibleData[_collectibleSig].price);
+        }
         _tokenIds.increment();
         uint256 newTokenId = _tokenIds.current();
 
