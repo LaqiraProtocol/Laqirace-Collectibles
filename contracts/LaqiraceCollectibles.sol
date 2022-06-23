@@ -47,8 +47,8 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     mapping(uint256 => TokenIdAttr) private tokenIdData;
     mapping(address => bool) private qouteToken;
 
-    address public minter;
-    address public mintingFeeAddress;
+    address private minter;
+    address private mintingFeeAddress;
 
     bytes32[] private collectiblesSigs;
     address[] private quoteTokens;
