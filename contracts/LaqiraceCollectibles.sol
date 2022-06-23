@@ -36,13 +36,13 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
 
     address public minter;
     address public mintingFeeAddress;
-    address public BUSDAddress;
+    address public qouteToken;
 
     bytes32[] private collectiblesSigs;
-    constructor(address _minter, address _mintingFeeAddress, address _BUSDAddress) ERC721("LaqiraceNFT", "LRNFT") {
+    constructor(address _minter, address _mintingFeeAddress, address _qouteToken) ERC721("LaqiraceNFT", "LRNFT") {
         minter = _minter;
         mintingFeeAddress = _mintingFeeAddress;
-        BUSDAddress = _BUSDAddress;
+        qouteToken = _qouteToken;
     }
 
     /** WARNING: This function is only used for import a collectible for the first time.
@@ -75,7 +75,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
 
         if (_msgSender() == minter) {
         } else {
-            TransferHelper.safeTransferFrom(BUSDAddress, _msgSender(), mintingFeeAddress, collectibleData[_collectibleSig].price);
+            TransferHelper.safeTransferFrom(qouteToken, _msgSender(), mintingFeeAddress, collectibleData[_collectibleSig].price);
         }
         _tokenIds.increment();
         uint256 newTokenId = _tokenIds.current();
@@ -101,7 +101,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
 
         if (_msgSender() == minter) {
         } else {
-            TransferHelper.safeTransferFrom(BUSDAddress, _msgSender(), mintingFeeAddress, collectibleData[_collectibleSig].price);
+            TransferHelper.safeTransferFrom(qouteToken, _msgSender(), mintingFeeAddress, collectibleData[_collectibleSig].price);
         }
         _tokenIds.increment();
         uint256 newTokenId = _tokenIds.current();
