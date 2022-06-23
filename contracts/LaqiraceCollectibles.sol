@@ -161,4 +161,8 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     function getCollectibleData(bytes32 _collectibleSig) public view returns (CollectibleAttr memory) {
         return collectibleData[_collectibleSig];
     }
+
+    function getCollectibleSaleData(bytes32 _collectibleSig) public view returns (SaleStatus memory) {
+        return saleData[_collectibleSig];
+    }
 }
