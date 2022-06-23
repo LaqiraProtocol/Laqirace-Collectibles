@@ -7,6 +7,18 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./TransferHelper.sol";
 
+interface IBEP20 {
+    /**
+     * @dev Moves `amount` tokens from the caller's account to `recipient`.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+
+    function transfer(address recipient, uint256 amount) external returns (bool);
+}
+
 contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
@@ -168,6 +180,11 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     function removeQuoteToken(address _quoteToken) public onlyOwner returns (bool) {
         delete qouteToken[_quoteToken];
         delAddressFromArray(_quoteToken, quoteTokens);
+        return true;
+    }
+
+    function transferAnyBEP20(address _tokenAddress, address _to, uint256 _amount) public virtual onlyOwner returns (bool) {
+        IBEP20(_tokenAddress).transfer(_to, _amount);
         return true;
     }
 
