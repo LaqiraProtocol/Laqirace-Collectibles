@@ -19,9 +19,12 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         uint256 totalSupply;
         bool preSale;
     }
+
+    mapping(bytes32 => CollectibleAttr) private collectibleData;
+    mapping(address => mapping(bytes32 => bool)) private userPreSaleStatus;
+    mapping(string => bytes32) private collectibleName;
     
     constructor() ERC721("LaqiraceNFT", "LRNFT") {
 
     }
-
 }
