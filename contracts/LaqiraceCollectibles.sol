@@ -188,6 +188,11 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         return true;
     }
 
+    function adminWithdrawal(uint256 _amount) public virtual onlyOwner {
+        address payable _owner = payable(owner());
+        _owner.transfer(_amount);
+    }
+
     function getCollectibleData(bytes32 _collectibleSig) public view returns (CollectibleAttr memory) {
         return collectibleData[_collectibleSig];
     }
