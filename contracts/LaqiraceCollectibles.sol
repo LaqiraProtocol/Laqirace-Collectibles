@@ -58,4 +58,26 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         collectibleName[_collectibleName] = collectibleSig;
         return collectibleSig;
     }
+
+    function mintCollectible(bytes32 _collectibleSig) public {
+        if (_msgSender() == minter) {}
+        else {
+            require(saleData[_collectibleSig].maxSupply == 0 ||
+            saleData[_collectibleSig].maxSupply > saleData[_collectibleSig].totalSupply
+            , 'Max supply for the collectible was reached');
+        }
+
+        require(saleData[_collectibleSig].salePermit, 'Minting the collectible is not permitted');
+        require(!saleData[_collectibleSig].preSale, 'Minting the collectible is not allowed due to being in presale stage');
+
+        TransferHelper.safeTransferFrom(BUSDAddress, _msgSender(), mintingFeeAddress, collectibleData[_collectibleSig].price);
+        _tokenIds.increment();
+        uint256 newTokenId = _tokenIds.current();
+
+        saleData[_collectibleSig].totalSupply++;
+
+        _mint(_msgSender(), newTokenId);
+        tokenIdData[newTokenId].collectible = _collectibleSig;
+        tokenIdData[newTokenId].collectibleNum = saleData[_collectibleSig].totalSupply;
+    }
 }
