@@ -39,6 +39,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     address public mintingFeeAddress;
 
     bytes32[] private collectiblesSigs;
+    address[] private quoteTokens;
     constructor(address _minter, address _mintingFeeAddress) ERC721("LaqiraceNFT", "LRNFT") {
         minter = _minter;
         mintingFeeAddress = _mintingFeeAddress;
@@ -150,11 +151,13 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
 
     function addQuoteToken(address _quoteToken) public onlyOwner returns (bool) {
         qouteToken[_quoteToken] = true;
+        quoteTokens.push(_quoteToken);
         return true;
     }
 
     function removeQuoteToken(address _quoteToken) public onlyOwner returns (bool) {
         delete qouteToken[_quoteToken];
+        delAddressFromArray(_quoteToken, quoteTokens);
         return true;
     }
 
@@ -172,5 +175,24 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
 
     function getUserPreSaleStatus(address _user, string memory _collectibleName) public view returns (bool) {
         return userPreSaleStatus[_user][collectibleNameToSig[_collectibleName]];
+    }
+
+    function delAddressFromArray(
+        address _element,
+        address[] storage array
+    ) internal virtual {
+        // delete the element
+        uint256 len = array.length;
+        uint256 j = 0;
+        for (uint256 i = 0; i <= len - 1; i++) {
+            if (array[i] == _element) {
+                j = i;
+                break;
+            }
+        }
+        for (j; j < len - 1; j++) {
+            array[j] = array[j + 1];
+        }
+        array.pop();
     }
 }
