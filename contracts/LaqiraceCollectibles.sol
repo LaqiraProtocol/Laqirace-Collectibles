@@ -147,4 +147,9 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         mintingFeeAddress = _newMintingFeeAddress;
         return true;
     }
+
+    function addQuoteToken(address _quoteToken) public onlyOwner returns (bool) {
+        qouteToken[_quoteToken] = true;
+        return true;
+    }
 }
