@@ -14,15 +14,21 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         uint256 price;
     }
 
-    struct saleStatus {
+    struct SaleStatus {
         uint256 maxSupply;
         uint256 totalSupply;
         bool preSale;
     }
 
+    struct TokenIdAttr {
+        bytes32 collectible;
+        uint256 collectibleNum;
+    }
+
     mapping(bytes32 => CollectibleAttr) private collectibleData;
     mapping(address => mapping(bytes32 => bool)) private userPreSaleStatus;
     mapping(string => bytes32) private collectibleName;
+    mapping(uint256 => TokenIdAttr) private tokenIdData;
     
     address public minter;
 
