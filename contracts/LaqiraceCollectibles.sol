@@ -45,6 +45,9 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         BUSDAddress = _BUSDAddress;
     }
 
+    /** WARNING: This function is only used for import a collectible for the first time.
+    Any update on a collectible should be carried out by updateCollectibleAttr function.
+    */
     function importCollectible(
         string memory _collectibleName,
         string memory _figure,
