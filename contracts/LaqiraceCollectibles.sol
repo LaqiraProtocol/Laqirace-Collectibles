@@ -26,6 +26,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         string name;
         string figure;
         uint256 price;
+        uint256 raceCost;
     }
 
     struct SaleStatus {
@@ -56,10 +57,12 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     address[] private quoteTokens;
     address[] private mintRequests;
 
-    event ImportCollectible(string collectibleName, string figure, uint256 price, bytes32 colletibleSig);
-    event UpdateCollectible(string oldCollectibleName, string newCollectibleName,
-    string oldFigure, string newFigure, uint256 oldPrice, uint256 newPrice, bytes32 colletibleSig);
+    event ImportCollectible(string collectibleName, string figure, uint256 price, uint256 raceCost, bytes32 colletibleSig);
+    event UpdateCollectible(string newCollectibleName, string newFigure, uint256 newPrice, uint256 newRaceCost,
+    bytes32 colletibleSig);
     event RequestForMinting(address applicant, bytes32 colletibleSig, uint256 collectibleNum);
+    event RechargeRequest(uint256 tokenId, address applicant, uint256 numOfRaces, uint256 cost, address quoteToken);
+
 
     constructor(address _minter, address _mintingFeeAddress) ERC721("LaqiraceNFT", "LRNFT") {
         minter = _minter;
@@ -72,15 +75,17 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     function importCollectible(
         string memory _collectibleName,
         string memory _figure,
-        uint256 _price) public onlyOwner returns (bytes32 collectibleSignature) {
-        bytes32 collectibleSig = keccak256(abi.encodePacked(_collectibleName, _figure, _price));
+        uint256 _price, 
+        uint256 _raceCost) public onlyOwner returns (bytes32 collectibleSignature) {
+        bytes32 collectibleSig = keccak256(abi.encodePacked(_collectibleName, _figure, _price, _raceCost));
         collectibleData[collectibleSig].name = _collectibleName;
         collectibleData[collectibleSig].figure = _figure;
         collectibleData[collectibleSig].price = _price;
+        collectibleData[collectibleSig].raceCost = _raceCost;
 
         collectiblesSigs.push(collectibleSig);
         collectibleNameToSig[_collectibleName] = collectibleSig;
-        emit ImportCollectible(_collectibleName, _figure, _price, collectibleSig);
+        emit ImportCollectible(_collectibleName, _figure, _price, _raceCost, collectibleSig);
         return collectibleSig;
     }
 
@@ -201,17 +206,16 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     function updateCollectibleAttr(bytes32 _collectibleSig,
     string memory _name,
     string memory _figure,
-    uint256 _price) public onlyOwner returns (bool) {
-        string memory oldName = collectibleData[_collectibleSig].name;
-        string memory oldFigure = collectibleData[_collectibleSig].figure;
-        uint256 oldPrice = collectibleData[_collectibleSig].price;
+    uint256 _price,
+    uint256 _raceCost) public onlyOwner returns (bool) {
         collectibleData[_collectibleSig].name = _name;
         collectibleData[_collectibleSig].figure = _figure;
         collectibleData[_collectibleSig].price = _price;
+        collectibleData[_collectibleSig].raceCost = _raceCost;
         
         delete collectibleNameToSig[collectibleData[_collectibleSig].name];
         collectibleNameToSig[_name] = _collectibleSig;
-        emit UpdateCollectible(oldName, _name, oldFigure, _figure, oldPrice, _price, _collectibleSig);
+        emit UpdateCollectible(_name, _figure, _price, _raceCost, _collectibleSig);
         return true;
     }
 
@@ -264,6 +268,15 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
 
     function burn(uint256 _tokenId) public onlyAccessHolder {
         _burn(_tokenId);
+    }
+
+    function requestChargeCollectible(uint256 _tokenId, uint256 _numOfRaces, address _quoteToken) public returns (bool) {
+        require(qouteToken[_quoteToken], 'Payment method is not allowed');
+        bytes32 _collectibleSig = tokenIdData[_tokenId].collectible;
+        uint256 _cost = _numOfRaces * collectibleData[_collectibleSig].raceCost;
+        TransferHelper.safeTransferFrom(_quoteToken, _msgSender(), mintingFeeAddress, _cost);
+        emit RechargeRequest(_tokenId, _msgSender(), _numOfRaces, _cost, _quoteToken);
+        return true;
     }
 
 
