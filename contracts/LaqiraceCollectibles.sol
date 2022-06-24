@@ -253,4 +253,9 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         }
         array.pop();
     }
+
+    modifier onlyAccessHolder() {
+        require(_msgSender() == owner() || _msgSender() == minter, 'Permission denied');
+        _;
+    }
 }
