@@ -81,21 +81,16 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     }
 
     function mintCollectible(bytes32 _collectibleSig, address _quoteToken) public {
-        if (_msgSender() == minter) {
-        } else {
-            require(saleData[_collectibleSig].maxSupply == 0 ||
-            saleData[_collectibleSig].maxSupply > saleData[_collectibleSig].totalSupply
-            , 'Max supply for the collectible was reached');
-        }
+        require(saleData[_collectibleSig].maxSupply == 0 ||
+                saleData[_collectibleSig].maxSupply > saleData[_collectibleSig].totalSupply
+                , 'Max supply for the collectible was reached');
 
         require(saleData[_collectibleSig].salePermit, 'Minting the collectible is not permitted');
         require(!saleData[_collectibleSig].preSale, 'Minting the collectible is not allowed due to being in presale stage');
 
-        if (_msgSender() == minter) {
-        } else {
-            require(qouteToken[_quoteToken], 'Payment method is not allowed');
-            TransferHelper.safeTransferFrom(_quoteToken, _msgSender(), mintingFeeAddress, collectibleData[_collectibleSig].price);
-        }
+        require(qouteToken[_quoteToken], 'Payment method is not allowed');
+        TransferHelper.safeTransferFrom(_quoteToken, _msgSender(), mintingFeeAddress, collectibleData[_collectibleSig].price);
+
         _tokenIds.increment();
         uint256 newTokenId = _tokenIds.current();
 
@@ -107,22 +102,17 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     }
 
     function preSaleCollectible(bytes32 _collectibleSig, address _quoteToken) public {
-        if (_msgSender() == minter) {
-        } else {
-            require(saleData[_collectibleSig].maxSupply == 0 ||
-            saleData[_collectibleSig].maxSupply > saleData[_collectibleSig].totalSupply
-            , 'Max supply for the collectible was reached');
-        }
+        require(saleData[_collectibleSig].maxSupply == 0 ||
+                saleData[_collectibleSig].maxSupply > saleData[_collectibleSig].totalSupply
+                , 'Max supply for the collectible was reached');
 
         require(saleData[_collectibleSig].salePermit, 'Minting the collectible is not permitted');
         require(saleData[_collectibleSig].preSale, 'Minting the collectible is not allowed due to being out of presale stage');
         require(!userPreSaleStatus[_msgSender()][_collectibleSig], 'Player has already bought the collectible in presale stage');
 
-        if (_msgSender() == minter) {
-        } else {
-            require(qouteToken[_quoteToken], 'Payment method is not allowed');
-            TransferHelper.safeTransferFrom(_quoteToken, _msgSender(), mintingFeeAddress, collectibleData[_collectibleSig].price);
-        }
+        require(qouteToken[_quoteToken], 'Payment method is not allowed');
+        TransferHelper.safeTransferFrom(_quoteToken, _msgSender(), mintingFeeAddress, collectibleData[_collectibleSig].price);
+        
         _tokenIds.increment();
         uint256 newTokenId = _tokenIds.current();
 
