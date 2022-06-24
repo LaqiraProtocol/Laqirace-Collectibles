@@ -47,7 +47,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     mapping(string => bytes32) private collectibleNameToSig;
     mapping(uint256 => TokenIdAttr) private tokenIdData;
     mapping(address => bool) private qouteToken;
-    mapping(address => TokenIdAttr[]) private mintRequests;
+    mapping(address => TokenIdAttr[]) private userMintRequests;
 
     address private minter;
     address private mintingFeeAddress;
@@ -143,8 +143,8 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     function mintForRequest(address _to, bytes32 _collectibleSig, uint256 _collectibleNum) public onlyAccessHolder returns (bool) {
         bool requestStatus;
         uint256 i;
-        for (; mintRequests[_to].length > i; i++) {
-            if (mintRequests[_to][i].collectible == _collectibleSig && mintRequests[_to][i].collectibleNum == _collectibleNum) {
+        for (; userMintRequests[_to].length > i; i++) {
+            if (userMintRequests[_to][i].collectible == _collectibleSig && userMintRequests[_to][i].collectibleNum == _collectibleNum) {
                 requestStatus = true;
                 break;
             }
@@ -158,7 +158,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
 
         tokenIdData[newTokenId].collectible = _collectibleSig;
         tokenIdData[newTokenId].collectibleNum = _collectibleNum;
-        delStructFromArray(i, mintRequests[_to]);
+        delStructFromArray(i, userMintRequests[_to]);
     }
 
     function requestForMint(bytes32 _collectibleSig, address _quoteToken) public {
@@ -183,9 +183,9 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         request.collectible = _collectibleSig;
         request.collectibleNum = saleData[_collectibleSig].totalSupply;
 
-        requests = mintRequests[_msgSender()];
+        requests = userMintRequests[_msgSender()];
         requests.push(request);
-        mintRequests[_msgSender()] = requests;
+        userMintRequests[_msgSender()] = requests;
 
         if (saleData[_collectibleSig].preSale) {
             userPreSaleStatus[_msgSender()][_collectibleSig] = true;
@@ -295,7 +295,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     }
 
     function getUserMintRequest(address _user) public view returns (TokenIdAttr[] memory) {
-        return mintRequests[_user];
+        return userMintRequests[_user];
     }
 
     function delAddressFromArray(
