@@ -209,7 +209,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         return true;
     }
 
-    function burn(uint256 _tokenId) public onlyOwner {
+    function burn(uint256 _tokenId) public onlyAccessHolder {
         _burn(_tokenId);
     }
 
