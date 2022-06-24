@@ -134,6 +134,17 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         tokenIdData[newTokenId].collectibleNum = saleData[_collectibleSig].totalSupply;
     }
 
+    function mintTo(address _to, bytes32 _collectibleSig) public onlyAccessHolder returns (bool) {
+        _tokenIds.increment();
+        uint256 newTokenId = _tokenIds.current();
+
+        saleData[_collectibleSig].totalSupply++;
+
+        _mint(_to, newTokenId);
+        tokenIdData[newTokenId].collectible = _collectibleSig;
+        tokenIdData[newTokenId].collectibleNum = saleData[_collectibleSig].totalSupply;
+    }
+
     function updateCollectibleAttr(bytes32 _collectibleSig,
     string memory _name,
     string memory _figure,
