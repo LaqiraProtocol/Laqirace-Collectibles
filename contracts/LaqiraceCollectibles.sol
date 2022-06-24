@@ -33,6 +33,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         uint256 totalSupply;
         bool salePermit;
         bool preSale;
+        bool saleByRequest;
     }
 
     struct TokenIdAttr {
@@ -46,6 +47,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     mapping(string => bytes32) private collectibleNameToSig;
     mapping(uint256 => TokenIdAttr) private tokenIdData;
     mapping(address => bool) private qouteToken;
+    mapping(address => TokenIdAttr[]) private mintRequests;
 
     address private minter;
     address private mintingFeeAddress;
@@ -56,6 +58,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     event ImportCollectible(string collectibleName, string figure, uint256 price, bytes32 colletibleSig);
     event UpdateCollectible(string oldCollectibleName, string newCollectibleName,
     string oldFigure, string newFigure, uint256 oldPrice, uint256 newPrice, bytes32 colletibleSig);
+    event RequestForMinting(address applicant, bytes32 colletibleSig, uint256 collectibleNum);
 
     constructor(address _minter, address _mintingFeeAddress) ERC721("LaqiraceNFT", "LRNFT") {
         minter = _minter;
@@ -81,12 +84,13 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     }
 
     function mintCollectible(bytes32 _collectibleSig, address _quoteToken) public {
+        require(saleData[_collectibleSig].salePermit, 'Minting the collectible is not permitted');
+        require(!saleData[_collectibleSig].preSale, 'Minting the collectible is not allowed due to being in presale stage');
+        require(!saleData[_collectibleSig].saleByRequest, 'Sale is only available by submitting request');
+
         require(saleData[_collectibleSig].maxSupply == 0 ||
                 saleData[_collectibleSig].maxSupply > saleData[_collectibleSig].totalSupply
                 , 'Max supply for the collectible was reached');
-
-        require(saleData[_collectibleSig].salePermit, 'Minting the collectible is not permitted');
-        require(!saleData[_collectibleSig].preSale, 'Minting the collectible is not allowed due to being in presale stage');
 
         require(qouteToken[_quoteToken], 'Payment method is not allowed');
         TransferHelper.safeTransferFrom(_quoteToken, _msgSender(), mintingFeeAddress, collectibleData[_collectibleSig].price);
@@ -102,13 +106,14 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     }
 
     function preSaleCollectible(bytes32 _collectibleSig, address _quoteToken) public {
+        require(saleData[_collectibleSig].salePermit, 'Minting the collectible is not permitted');
+        require(saleData[_collectibleSig].preSale, 'Minting the collectible is not allowed due to being out of presale stage');
+        require(!saleData[_collectibleSig].saleByRequest, 'Sale is only available by submitting request');
+        require(!userPreSaleStatus[_msgSender()][_collectibleSig], 'Player has already bought the collectible in presale stage');
+        
         require(saleData[_collectibleSig].maxSupply == 0 ||
                 saleData[_collectibleSig].maxSupply > saleData[_collectibleSig].totalSupply
                 , 'Max supply for the collectible was reached');
-
-        require(saleData[_collectibleSig].salePermit, 'Minting the collectible is not permitted');
-        require(saleData[_collectibleSig].preSale, 'Minting the collectible is not allowed due to being out of presale stage');
-        require(!userPreSaleStatus[_msgSender()][_collectibleSig], 'Player has already bought the collectible in presale stage');
 
         require(qouteToken[_quoteToken], 'Payment method is not allowed');
         TransferHelper.safeTransferFrom(_quoteToken, _msgSender(), mintingFeeAddress, collectibleData[_collectibleSig].price);
@@ -133,6 +138,59 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         _mint(_to, newTokenId);
         tokenIdData[newTokenId].collectible = _collectibleSig;
         tokenIdData[newTokenId].collectibleNum = saleData[_collectibleSig].totalSupply;
+    }
+
+    function mintForRequest(address _to, bytes32 _collectibleSig, uint256 _collectibleNum) public onlyAccessHolder returns (bool) {
+        bool requestStatus;
+        uint256 i;
+        for (; mintRequests[_to].length > i; i++) {
+            if (mintRequests[_to][i].collectible == _collectibleSig && mintRequests[_to][i].collectibleNum == _collectibleNum) {
+                requestStatus = true;
+                break;
+            }
+        }
+        require(requestStatus, 'Request not found');
+        
+        _tokenIds.increment();
+        uint256 newTokenId = _tokenIds.current();
+
+        _mint(_to, newTokenId);
+
+        tokenIdData[newTokenId].collectible = _collectibleSig;
+        tokenIdData[newTokenId].collectibleNum = _collectibleNum;
+        delStructFromArray(i, mintRequests[_to]);
+    }
+
+    function requestForMint(bytes32 _collectibleSig, address _quoteToken) public {
+        require(saleData[_collectibleSig].salePermit, 'Minting the collectible is not permitted');
+        require(saleData[_collectibleSig].saleByRequest, 'Sale is only available by submitting request');
+
+        require(saleData[_collectibleSig].maxSupply == 0 ||
+                saleData[_collectibleSig].maxSupply > saleData[_collectibleSig].totalSupply
+                , 'Max supply for the collectible was reached');
+        
+        if (saleData[_collectibleSig].preSale) {
+             require(!userPreSaleStatus[_msgSender()][_collectibleSig], 'Player has already bought the collectible in presale stage');
+        }
+
+        require(qouteToken[_quoteToken], 'Payment method is not allowed');
+        TransferHelper.safeTransferFrom(_quoteToken, _msgSender(), mintingFeeAddress, collectibleData[_collectibleSig].price);
+        
+        saleData[_collectibleSig].totalSupply++;
+
+        TokenIdAttr[] storage requests;
+        TokenIdAttr memory request;
+        request.collectible = _collectibleSig;
+        request.collectibleNum = saleData[_collectibleSig].totalSupply;
+
+        requests = mintRequests[_msgSender()];
+        requests.push(request);
+        mintRequests[_msgSender()] = requests;
+
+        if (saleData[_collectibleSig].preSale) {
+            userPreSaleStatus[_msgSender()][_collectibleSig] = true;
+        }
+        emit RequestForMinting(_msgSender(), _collectibleSig, saleData[_collectibleSig].totalSupply);
     }
 
     function updateCollectibleAttr(bytes32 _collectibleSig,
@@ -236,6 +294,10 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         return mintingFeeAddress;
     }
 
+    function getUserMintRequest(address _user) public view returns (TokenIdAttr[] memory) {
+        return mintRequests[_user];
+    }
+
     function delAddressFromArray(
         address _element,
         address[] storage array
@@ -251,6 +313,17 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         }
         for (j; j < len - 1; j++) {
             array[j] = array[j + 1];
+        }
+        array.pop();
+    }
+
+    function delStructFromArray(
+        uint256 i,
+        TokenIdAttr[] storage array
+    ) internal {
+        uint256 len = array.length;
+        for (i; i < len - 1; i++) {
+            array[i] = array[i + 1];
         }
         array.pop();
     }
