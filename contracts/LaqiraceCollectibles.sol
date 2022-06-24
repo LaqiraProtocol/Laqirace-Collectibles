@@ -54,6 +54,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
 
     bytes32[] private collectiblesSigs;
     address[] private quoteTokens;
+    address[] private mintRequests;
 
     event ImportCollectible(string collectibleName, string figure, uint256 price, bytes32 colletibleSig);
     event UpdateCollectible(string oldCollectibleName, string newCollectibleName,
@@ -159,6 +160,9 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         tokenIdData[newTokenId].collectible = _collectibleSig;
         tokenIdData[newTokenId].collectibleNum = _collectibleNum;
         delStructFromArray(i, userMintRequests[_to]);
+        if (userMintRequests[_to].length == 0) {
+            delAddressFromArray(_to, mintRequests);
+        }
     }
 
     function requestForMint(bytes32 _collectibleSig, address _quoteToken) public {
@@ -186,6 +190,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         requests = userMintRequests[_msgSender()];
         requests.push(request);
         userMintRequests[_msgSender()] = requests;
+        mintRequests.push(_msgSender());
 
         if (saleData[_collectibleSig].preSale) {
             userPreSaleStatus[_msgSender()][_collectibleSig] = true;
@@ -296,6 +301,10 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
 
     function getUserMintRequest(address _user) public view returns (TokenIdAttr[] memory) {
         return userMintRequests[_user];
+    }
+
+    function getMintRequests() public view returns (address[] memory) {
+        return mintRequests;
     }
 
     function delAddressFromArray(
