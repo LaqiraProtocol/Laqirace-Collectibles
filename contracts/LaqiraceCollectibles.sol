@@ -47,7 +47,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     mapping(address => mapping(bytes32 => bool)) private userPreSaleStatus;
     mapping(string => bytes32) private collectibleNameToSig;
     mapping(uint256 => TokenIdAttr) private tokenIdData;
-    mapping(address => bool) private qouteToken;
+    mapping(address => bool) private quoteToken;
     mapping(address => TokenIdAttr[]) private userMintRequests;
 
     address private minter;
@@ -98,7 +98,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
                 saleData[_collectibleSig].maxSupply > saleData[_collectibleSig].totalSupply
                 , 'Max supply for the collectible was reached');
 
-        require(qouteToken[_quoteToken], 'Payment method is not allowed');
+        require(quoteToken[_quoteToken], 'Payment method is not allowed');
         TransferHelper.safeTransferFrom(_quoteToken, _msgSender(), mintingFeeAddress, collectibleData[_collectibleSig].price);
 
         _tokenIds.increment();
@@ -121,7 +121,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
                 saleData[_collectibleSig].maxSupply > saleData[_collectibleSig].totalSupply
                 , 'Max supply for the collectible was reached');
 
-        require(qouteToken[_quoteToken], 'Payment method is not allowed');
+        require(quoteToken[_quoteToken], 'Payment method is not allowed');
         TransferHelper.safeTransferFrom(_quoteToken, _msgSender(), mintingFeeAddress, collectibleData[_collectibleSig].price);
         
         _tokenIds.increment();
@@ -182,7 +182,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
              require(!userPreSaleStatus[_msgSender()][_collectibleSig], 'Player has already bought the collectible in presale stage');
         }
 
-        require(qouteToken[_quoteToken], 'Payment method is not allowed');
+        require(quoteToken[_quoteToken], 'Payment method is not allowed');
         TransferHelper.safeTransferFrom(_quoteToken, _msgSender(), mintingFeeAddress, collectibleData[_collectibleSig].price);
         
         saleData[_collectibleSig].totalSupply++;
@@ -240,13 +240,13 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     }
 
     function addQuoteToken(address _quoteToken) public onlyOwner returns (bool) {
-        qouteToken[_quoteToken] = true;
+        quoteToken[_quoteToken] = true;
         quoteTokens.push(_quoteToken);
         return true;
     }
 
     function removeQuoteToken(address _quoteToken) public onlyOwner returns (bool) {
-        delete qouteToken[_quoteToken];
+        delete quoteToken[_quoteToken];
         delAddressFromArray(_quoteToken, quoteTokens);
         return true;
     }
@@ -271,7 +271,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     }
 
     function requestChargeCollectible(uint256 _tokenId, uint256 _numOfRaces, address _quoteToken) public returns (bool) {
-        require(qouteToken[_quoteToken], 'Payment method is not allowed');
+        require(quoteToken[_quoteToken], 'Payment method is not allowed');
         bytes32 _collectibleSig = tokenIdData[_tokenId].collectible;
         uint256 _cost = _numOfRaces * collectibleData[_collectibleSig].raceCost;
         TransferHelper.safeTransferFrom(_quoteToken, _msgSender(), mintingFeeAddress, _cost);
