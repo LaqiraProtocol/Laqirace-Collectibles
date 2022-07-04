@@ -222,10 +222,12 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     function setSaleStatus(bytes32 _collectibleSig,
     uint256 _maxSupply,
     bool _salePermit,
-    bool _preSale) public onlyOwner returns (bool) {
+    bool _preSale,
+    bool _saleByRequest) public onlyOwner returns (bool) {
         saleData[_collectibleSig].maxSupply = _maxSupply;
         saleData[_collectibleSig].salePermit = _salePermit;
         saleData[_collectibleSig].preSale = _preSale;
+        saleData[_collectibleSig].saleByRequest = _saleByRequest;
         return true;
     }
 
