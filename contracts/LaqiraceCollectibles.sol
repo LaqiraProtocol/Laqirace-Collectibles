@@ -92,6 +92,15 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         emit ImportCollectible(_collectibleName, _figure, _price, _raceCost, collectibleSig);
         return collectibleSig;
     }
+    
+    function removeCollectible(bytes32 _collectibleSig) public onlyOwner {
+        require(collectibleSigExists[_collectibleSig], 'Collectible does not exist');
+        delete collectibleSigExists[_collectibleSig];
+        delete collectibleNameToSig[collectibleData[_collectibleSig].name];
+        delete collectibleData[_collectibleSig];
+        delBytes32FromArray(_collectibleSig, collectiblesSigs);
+        emit RemoveCollectible(_collectibleSig);
+    }
 
     function mintCollectible(bytes32 _collectibleSig, address _quoteToken) public {
         require(saleData[_collectibleSig].salePermit, 'Minting the collectible is not permitted');
