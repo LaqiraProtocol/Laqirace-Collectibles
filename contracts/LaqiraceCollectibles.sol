@@ -345,6 +345,25 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         }
         array.pop();
     }
+    
+    function delBytes32FromArray(
+        bytes32 _element,
+        bytes32[] storage array
+    ) internal virtual {
+        // delete the element
+        uint256 len = array.length;
+        uint256 j = 0;
+        for (uint256 i = 0; i <= len - 1; i++) {
+            if (array[i] == _element) {
+                j = i;
+                break;
+            }
+        }
+        for (j; j < len - 1; j++) {
+            array[j] = array[j + 1];
+        }
+        array.pop();
+    }
 
     function delStructFromArray(
         uint256 i,
