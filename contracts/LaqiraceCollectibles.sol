@@ -211,6 +211,8 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     string memory _figure,
     uint256 _price,
     uint256 _raceCost) public onlyOwner returns (bool) {
+        require(collectibleSigExists[_collectibleSig], 'Collectible does not exists');
+        
         delete collectibleNameToSig[collectibleData[_collectibleSig].name];
         
         collectibleData[_collectibleSig].name = _name;
