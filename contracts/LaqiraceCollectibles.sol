@@ -139,6 +139,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     }
 
     function mintTo(address _to, bytes32 _collectibleSig) public onlyAccessHolder {
+        require(collectibleSigExists[_collectibleSig], 'Collectible does not exists');
         _tokenIds.increment();
         uint256 newTokenId = _tokenIds.current();
 
