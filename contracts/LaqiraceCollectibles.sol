@@ -279,6 +279,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     }
 
     function requestChargeCollectible(uint256 _tokenId, uint256 _numOfRaces, address _quoteToken) public returns (bool) {
+        require(_exists(_tokenId), 'tokenId does not exist');
         require(quoteToken[_quoteToken], 'Payment method is not allowed');
         bytes32 _collectibleSig = tokenIdData[_tokenId].collectible;
         uint256 _cost = _numOfRaces * collectibleData[_collectibleSig].raceCost;
