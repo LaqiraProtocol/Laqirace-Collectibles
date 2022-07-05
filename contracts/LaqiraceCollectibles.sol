@@ -230,6 +230,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     bool _salePermit,
     bool _preSale,
     bool _saleByRequest) public onlyOwner returns (bool) {
+        require(collectibleSigExists[_collectibleSig], 'Collectible does not exists');
         saleData[_collectibleSig].maxSupply = _maxSupply;
         saleData[_collectibleSig].salePermit = _salePermit;
         saleData[_collectibleSig].preSale = _preSale;
