@@ -79,6 +79,8 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         uint256 _price, 
         uint256 _raceCost) public onlyOwner returns (bytes32 collectibleSignature) {
         bytes32 collectibleSig = keccak256(abi.encodePacked(_collectibleName, _figure, _price, _raceCost));
+        require(!collectibleSigExists[collectibleSig], 'Collectible already exists');
+        collectibleSigExists[collectibleSig] = true;
         collectibleData[collectibleSig].name = _collectibleName;
         collectibleData[collectibleSig].figure = _figure;
         collectibleData[collectibleSig].price = _price;
