@@ -59,6 +59,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     address[] private mintRequests;
 
     event ImportCollectible(string collectibleName, string figure, uint256 price, uint256 raceCost, bytes32 colletibleSig);
+    event RemoveCollectible(bytes32 colletibleSig);
     event UpdateCollectible(string newCollectibleName, string newFigure, uint256 newPrice, uint256 newRaceCost,
     bytes32 colletibleSig);
     event RequestForMinting(address applicant, bytes32 colletibleSig, uint256 collectibleNum);
