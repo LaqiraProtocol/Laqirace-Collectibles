@@ -211,12 +211,13 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     string memory _figure,
     uint256 _price,
     uint256 _raceCost) public onlyOwner returns (bool) {
+        delete collectibleNameToSig[collectibleData[_collectibleSig].name];
+        
         collectibleData[_collectibleSig].name = _name;
         collectibleData[_collectibleSig].figure = _figure;
         collectibleData[_collectibleSig].price = _price;
         collectibleData[_collectibleSig].raceCost = _raceCost;
         
-        delete collectibleNameToSig[collectibleData[_collectibleSig].name];
         collectibleNameToSig[_name] = _collectibleSig;
         emit UpdateCollectible(_name, _figure, _price, _raceCost, _collectibleSig);
         return true;
