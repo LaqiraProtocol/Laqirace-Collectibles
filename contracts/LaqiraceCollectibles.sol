@@ -138,7 +138,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         tokenIdData[newTokenId].collectibleNum = saleData[_collectibleSig].totalSupply;
     }
 
-    function mintTo(address _to, bytes32 _collectibleSig) public onlyAccessHolder returns (bool) {
+    function mintTo(address _to, bytes32 _collectibleSig) public onlyAccessHolder {
         _tokenIds.increment();
         uint256 newTokenId = _tokenIds.current();
 
@@ -149,7 +149,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         tokenIdData[newTokenId].collectibleNum = saleData[_collectibleSig].totalSupply;
     }
 
-    function mintForRequest(address _to, bytes32 _collectibleSig, uint256 _collectibleNum) public onlyAccessHolder returns (bool) {
+    function mintForRequest(address _to, bytes32 _collectibleSig, uint256 _collectibleNum) public onlyAccessHolder {
         bool requestStatus;
         uint256 i;
         for (; userMintRequests[_to].length > i; i++) {
@@ -210,7 +210,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     string memory _name,
     string memory _figure,
     uint256 _price,
-    uint256 _raceCost) public onlyOwner returns (bool) {
+    uint256 _raceCost) public onlyOwner {
         require(collectibleSigExists[_collectibleSig], 'Collectible does not exists');
         
         delete collectibleNameToSig[collectibleData[_collectibleSig].name];
@@ -222,47 +222,40 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         
         collectibleNameToSig[_name] = _collectibleSig;
         emit UpdateCollectible(_name, _figure, _price, _raceCost, _collectibleSig);
-        return true;
     }
 
     function setSaleStatus(bytes32 _collectibleSig,
     uint256 _maxSupply,
     bool _salePermit,
     bool _preSale,
-    bool _saleByRequest) public onlyOwner returns (bool) {
+    bool _saleByRequest) public onlyOwner {
         require(collectibleSigExists[_collectibleSig], 'Collectible does not exists');
         saleData[_collectibleSig].maxSupply = _maxSupply;
         saleData[_collectibleSig].salePermit = _salePermit;
         saleData[_collectibleSig].preSale = _preSale;
         saleData[_collectibleSig].saleByRequest = _saleByRequest;
-        return true;
     }
 
-    function updateMinter(address _newMinter) public onlyOwner returns (bool) {
+    function updateMinter(address _newMinter) public onlyOwner {
         minter = _newMinter;
-        return true;
     }
 
-    function updateMintingFeeAddress(address _newMintingFeeAddress) public onlyOwner returns (bool) {
+    function updateMintingFeeAddress(address _newMintingFeeAddress) public onlyOwner {
         mintingFeeAddress = _newMintingFeeAddress;
-        return true;
     }
 
-    function addQuoteToken(address _quoteToken) public onlyOwner returns (bool) {
+    function addQuoteToken(address _quoteToken) public onlyOwner {
         quoteToken[_quoteToken] = true;
         quoteTokens.push(_quoteToken);
-        return true;
     }
 
-    function removeQuoteToken(address _quoteToken) public onlyOwner returns (bool) {
+    function removeQuoteToken(address _quoteToken) public onlyOwner {
         delete quoteToken[_quoteToken];
         delAddressFromArray(_quoteToken, quoteTokens);
-        return true;
     }
 
-    function transferAnyBEP20(address _tokenAddress, address _to, uint256 _amount) public virtual onlyOwner returns (bool) {
+    function transferAnyBEP20(address _tokenAddress, address _to, uint256 _amount) public virtual onlyOwner {
         IBEP20(_tokenAddress).transfer(_to, _amount);
-        return true;
     }
 
     function adminWithdrawal(uint256 _amount) public virtual onlyOwner {
@@ -270,23 +263,21 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         _owner.transfer(_amount);
     }
 
-    function transfer(address _to, uint256 _tokenId) public virtual returns (bool) {
+    function transfer(address _to, uint256 _tokenId) public virtual {
         _transfer(_msgSender(), _to, _tokenId);
-        return true;
     }
 
     function burn(uint256 _tokenId) public onlyAccessHolder {
         _burn(_tokenId);
     }
 
-    function requestChargeCollectible(uint256 _tokenId, uint256 _numOfRaces, address _quoteToken) public returns (bool) {
+    function requestChargeCollectible(uint256 _tokenId, uint256 _numOfRaces, address _quoteToken) public {
         require(_exists(_tokenId), 'tokenId does not exist');
         require(quoteToken[_quoteToken], 'Payment method is not allowed');
         bytes32 _collectibleSig = tokenIdData[_tokenId].collectible;
         uint256 _cost = _numOfRaces * collectibleData[_collectibleSig].raceCost;
         TransferHelper.safeTransferFrom(_quoteToken, _msgSender(), mintingFeeAddress, _cost);
         emit RechargeRequest(_tokenId, _msgSender(), _numOfRaces, _cost, _quoteToken);
-        return true;
     }
 
 
