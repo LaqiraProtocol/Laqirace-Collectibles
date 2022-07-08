@@ -94,7 +94,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     }
     
     function removeCollectible(bytes32 _collectibleSig) public onlyOwner {
-        require(collectibleSigExists[_collectibleSig], 'Collectible does not exist');
+        require(collectibleSigExists[_collectibleSig], 'Collectible does not exists');
         delete collectibleSigExists[_collectibleSig];
         delete collectibleNameToSig[collectibleData[_collectibleSig].name];
         delete collectibleData[_collectibleSig];
