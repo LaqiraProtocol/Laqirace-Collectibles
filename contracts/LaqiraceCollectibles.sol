@@ -97,7 +97,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     }
     
     function removeCollectible(bytes32 _collectibleSig) public onlyOwner {
-        require(collectibleSigExists[_collectibleSig], 'Collectible does not exists');
+        require(collectibleSigExists[_collectibleSig], 'Collectible does not exist');
         delete collectibleSigExists[_collectibleSig];
         delete collectibleNameToSig[collectibleData[_collectibleSig].name];
         delete collectibleData[_collectibleSig];
@@ -152,7 +152,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     }
 
     function mintTo(address _to, bytes32 _collectibleSig) public onlyAccessHolder {
-        require(collectibleSigExists[_collectibleSig], 'Collectible does not exists');
+        require(collectibleSigExists[_collectibleSig], 'Collectible does not exist');
         _tokenIds.increment();
         uint256 newTokenId = _tokenIds.current();
 
@@ -226,7 +226,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     uint256 _price,
     uint256 _raceCost,
     uint256 _maxRaces) public onlyOwner {
-        require(collectibleSigExists[_collectibleSig], 'Collectible does not exists');
+        require(collectibleSigExists[_collectibleSig], 'Collectible does not exist');
         
         delete collectibleNameToSig[collectibleData[_collectibleSig].name];
         
@@ -245,7 +245,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     bool _salePermit,
     bool _preSale,
     bool _saleByRequest) public onlyOwner {
-        require(collectibleSigExists[_collectibleSig], 'Collectible does not exists');
+        require(collectibleSigExists[_collectibleSig], 'Collectible does not exist');
         saleData[_collectibleSig].maxSupply = _maxSupply;
         saleData[_collectibleSig].salePermit = _salePermit;
         saleData[_collectibleSig].preSale = _preSale;
