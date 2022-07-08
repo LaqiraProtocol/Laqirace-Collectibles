@@ -27,6 +27,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         string figure;
         uint256 price;
         uint256 raceCost;
+        uint256 maxRaces;
     }
 
     struct SaleStatus {
@@ -58,9 +59,9 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     address[] private quoteTokens;
     address[] private mintRequests;
 
-    event ImportCollectible(string collectibleName, string figure, uint256 price, uint256 raceCost, bytes32 colletibleSig);
+    event ImportCollectible(string collectibleName, string figure, uint256 price, uint256 raceCost, uint256 maxRaces, bytes32 colletibleSig);
     event RemoveCollectible(bytes32 colletibleSig);
-    event UpdateCollectible(string newCollectibleName, string newFigure, uint256 newPrice, uint256 newRaceCost,
+    event UpdateCollectible(string newCollectibleName, string newFigure, uint256 newPrice, uint256 newRaceCost, uint256 newMaxRaces,
     bytes32 colletibleSig);
     event RequestForMinting(address applicant, bytes32 colletibleSig, uint256 collectibleNum);
     event RechargeRequest(uint256 tokenId, address applicant, uint256 numOfRaces, uint256 cost, address quoteToken);
@@ -78,18 +79,20 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         string memory _collectibleName,
         string memory _figure,
         uint256 _price, 
-        uint256 _raceCost) public onlyOwner returns (bytes32) {
-        bytes32 collectibleSig = keccak256(abi.encode(_collectibleName, _figure, _price, _raceCost));
+        uint256 _raceCost,
+        uint256 _maxRaces) public onlyOwner returns (bytes32) {
+        bytes32 collectibleSig = keccak256(abi.encode(_collectibleName, _figure, _price, _raceCost, _maxRaces));
         require(!collectibleSigExists[collectibleSig], 'Collectible already exists');
         collectibleSigExists[collectibleSig] = true;
         collectibleData[collectibleSig].name = _collectibleName;
         collectibleData[collectibleSig].figure = _figure;
         collectibleData[collectibleSig].price = _price;
         collectibleData[collectibleSig].raceCost = _raceCost;
+        collectibleData[collectibleSig].maxRaces = _maxRaces;
 
         collectiblesSigs.push(collectibleSig);
         collectibleNameToSig[_collectibleName] = collectibleSig;
-        emit ImportCollectible(_collectibleName, _figure, _price, _raceCost, collectibleSig);
+        emit ImportCollectible(_collectibleName, _figure, _price, _raceCost, _maxRaces, collectibleSig);
         return collectibleSig;
     }
     
@@ -221,7 +224,8 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     string memory _name,
     string memory _figure,
     uint256 _price,
-    uint256 _raceCost) public onlyOwner {
+    uint256 _raceCost,
+    uint256 _maxRaces) public onlyOwner {
         require(collectibleSigExists[_collectibleSig], 'Collectible does not exists');
         
         delete collectibleNameToSig[collectibleData[_collectibleSig].name];
@@ -230,9 +234,10 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         collectibleData[_collectibleSig].figure = _figure;
         collectibleData[_collectibleSig].price = _price;
         collectibleData[_collectibleSig].raceCost = _raceCost;
+        collectibleData[_collectibleSig].maxRaces = _maxRaces;
         
         collectibleNameToSig[_name] = _collectibleSig;
-        emit UpdateCollectible(_name, _figure, _price, _raceCost, _collectibleSig);
+        emit UpdateCollectible(_name, _figure, _price, _raceCost, _maxRaces, _collectibleSig);
     }
 
     function setSaleStatus(bytes32 _collectibleSig,
@@ -284,6 +289,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
 
     function requestChargeCollectible(uint256 _tokenId, uint256 _numOfRaces, address _quoteToken) public {
         require(_exists(_tokenId), 'tokenId does not exist');
+        require(_numOfRaces <= collectibleData[tokenIdData[_tokenId].collectible].maxRaces, 'Number of races is more than max allowed races');
         require(quoteToken[_quoteToken], 'Payment method is not allowed');
         bytes32 _collectibleSig = tokenIdData[_tokenId].collectible;
         uint256 _cost = _numOfRaces * collectibleData[_collectibleSig].raceCost;
