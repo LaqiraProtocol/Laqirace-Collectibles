@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import "./TransferHelper.sol";
 
@@ -19,9 +19,9 @@ interface IBEP20 {
     function transfer(address recipient, uint256 amount) external returns (bool);
 }
 
-contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
-    using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
+contract LaqiraceCollectibles is ERC721EnumerableUpgradeable, OwnableUpgradeable {
+    using CountersUpgradeable for CountersUpgradeable.Counter;
+    CountersUpgradeable.Counter private _tokenIds;
     struct CollectibleAttr {
         string name;
         string figure;
@@ -66,8 +66,9 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     event RequestForMinting(address applicant, bytes32 colletibleSig, uint256 collectibleNum);
     event RechargeRequest(uint256 tokenId, address applicant, uint256 numOfRaces, uint256 cost, address quoteToken);
 
-
-    constructor(address _minter, address _mintingFeeAddress) ERC721("LaqiraceNFT", "LRNFT") {
+    function initialize(string memory _name, string memory _symbol, address _minter, address _mintingFeeAddress) public initializer {
+        __ERC721_init_unchained(_name, _symbol);
+        __Ownable_init_unchained();
         minter = _minter;
         mintingFeeAddress = _mintingFeeAddress;
     }
@@ -80,7 +81,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         string memory _figure,
         uint256 _price, 
         uint256 _raceCost,
-        uint256 _maxRaces) public onlyOwner returns (bytes32) {
+        uint256 _maxRaces) public virtual onlyOwner returns (bytes32) {
         bytes32 collectibleSig = keccak256(abi.encode(_collectibleName, _figure, _price, _raceCost, _maxRaces));
         require(!collectibleSigExists[collectibleSig], 'Collectible already exists');
         collectibleSigExists[collectibleSig] = true;
@@ -96,7 +97,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         return collectibleSig;
     }
     
-    function removeCollectible(bytes32 _collectibleSig) public onlyOwner {
+    function removeCollectible(bytes32 _collectibleSig) public virtual onlyOwner {
         require(collectibleSigExists[_collectibleSig], 'Collectible does not exist');
         delete collectibleSigExists[_collectibleSig];
         delete collectibleNameToSig[collectibleData[_collectibleSig].name];
@@ -105,7 +106,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         emit RemoveCollectible(_collectibleSig);
     }
 
-    function mintCollectible(bytes32 _collectibleSig, address _quoteToken) public {
+    function mintCollectible(bytes32 _collectibleSig, address _quoteToken) public virtual {
         require(saleData[_collectibleSig].salePermit, 'Minting the collectible is not permitted');
         require(!saleData[_collectibleSig].preSale, 'Minting the collectible is not allowed due to being in presale stage');
         require(!saleData[_collectibleSig].saleByRequest, 'Sale is only available by submitting request');
@@ -127,7 +128,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         tokenIdData[newTokenId].collectibleNum = saleData[_collectibleSig].totalSupply;
     }
 
-    function preSaleCollectible(bytes32 _collectibleSig, address _quoteToken) public {
+    function preSaleCollectible(bytes32 _collectibleSig, address _quoteToken) public virtual {
         require(saleData[_collectibleSig].salePermit, 'Minting the collectible is not permitted');
         require(saleData[_collectibleSig].preSale, 'Minting the collectible is not allowed due to being out of presale stage');
         require(!saleData[_collectibleSig].saleByRequest, 'Sale is only available by submitting request');
@@ -151,7 +152,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         tokenIdData[newTokenId].collectibleNum = saleData[_collectibleSig].totalSupply;
     }
 
-    function mintTo(address _to, bytes32 _collectibleSig) public onlyAccessHolder {
+    function mintTo(address _to, bytes32 _collectibleSig) public virtual onlyAccessHolder {
         require(collectibleSigExists[_collectibleSig], 'Collectible does not exist');
         _tokenIds.increment();
         uint256 newTokenId = _tokenIds.current();
@@ -163,7 +164,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         tokenIdData[newTokenId].collectibleNum = saleData[_collectibleSig].totalSupply;
     }
 
-    function mintForRequest(address _to, bytes32 _collectibleSig, uint256 _collectibleNum) public onlyAccessHolder {
+    function mintForRequest(address _to, bytes32 _collectibleSig, uint256 _collectibleNum) public virtual onlyAccessHolder {
         bool requestStatus;
         uint256 i;
         for (; userMintRequests[_to].length > i; i++) {
@@ -187,7 +188,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         }
     }
 
-    function requestForMint(bytes32 _collectibleSig, address _quoteToken) public {
+    function requestForMint(bytes32 _collectibleSig, address _quoteToken) public virtual {
         require(saleData[_collectibleSig].salePermit, 'Minting the collectible is not permitted');
         require(saleData[_collectibleSig].saleByRequest, 'Sale is only available by submitting request');
 
@@ -225,7 +226,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     string memory _figure,
     uint256 _price,
     uint256 _raceCost,
-    uint256 _maxRaces) public onlyOwner {
+    uint256 _maxRaces) public virtual onlyOwner {
         require(collectibleSigExists[_collectibleSig], 'Collectible does not exist');
         
         delete collectibleNameToSig[collectibleData[_collectibleSig].name];
@@ -244,7 +245,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     uint256 _maxSupply,
     bool _salePermit,
     bool _preSale,
-    bool _saleByRequest) public onlyOwner {
+    bool _saleByRequest) public virtual onlyOwner {
         require(collectibleSigExists[_collectibleSig], 'Collectible does not exist');
         saleData[_collectibleSig].maxSupply = _maxSupply;
         saleData[_collectibleSig].salePermit = _salePermit;
@@ -252,20 +253,20 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         saleData[_collectibleSig].saleByRequest = _saleByRequest;
     }
 
-    function updateMinter(address _newMinter) public onlyOwner {
+    function updateMinter(address _newMinter) public virtual onlyOwner {
         minter = _newMinter;
     }
 
-    function updateMintingFeeAddress(address _newMintingFeeAddress) public onlyOwner {
+    function updateMintingFeeAddress(address _newMintingFeeAddress) public virtual onlyOwner {
         mintingFeeAddress = _newMintingFeeAddress;
     }
 
-    function addQuoteToken(address _quoteToken) public onlyOwner {
+    function addQuoteToken(address _quoteToken) public virtual onlyOwner {
         quoteToken[_quoteToken] = true;
         quoteTokens.push(_quoteToken);
     }
 
-    function removeQuoteToken(address _quoteToken) public onlyOwner {
+    function removeQuoteToken(address _quoteToken) public virtual onlyOwner {
         delete quoteToken[_quoteToken];
         delAddressFromArray(_quoteToken, quoteTokens);
     }
@@ -283,11 +284,11 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
         _transfer(_msgSender(), _to, _tokenId);
     }
 
-    function burn(uint256 _tokenId) public onlyAccessHolder {
+    function burn(uint256 _tokenId) public virtual onlyAccessHolder {
         _burn(_tokenId);
     }
 
-    function requestChargeCollectible(uint256 _tokenId, uint256 _numOfRaces, address _quoteToken) public {
+    function requestChargeCollectible(uint256 _tokenId, uint256 _numOfRaces, address _quoteToken) public virtual {
         require(_exists(_tokenId), 'tokenId does not exist');
         require(_numOfRaces <= collectibleData[tokenIdData[_tokenId].collectible].maxRaces, 'Number of races is more than max allowed races');
         require(quoteToken[_quoteToken], 'Payment method is not allowed');
@@ -298,47 +299,47 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     }
 
 
-    function getCollectibleData(bytes32 _collectibleSig) public view returns (CollectibleAttr memory) {
+    function getCollectibleData(bytes32 _collectibleSig) public virtual view returns (CollectibleAttr memory) {
         return collectibleData[_collectibleSig];
     }
 
-    function getCollectibleSaleData(bytes32 _collectibleSig) public view returns (SaleStatus memory) {
+    function getCollectibleSaleData(bytes32 _collectibleSig) public virtual view returns (SaleStatus memory) {
         return saleData[_collectibleSig];
     }
     
-    function getCollectibleSigByName(string memory _collectibleName) public view returns (bytes32) {
+    function getCollectibleSigByName(string memory _collectibleName) public virtual view returns (bytes32) {
         return collectibleNameToSig[_collectibleName];
     }
 
-    function getTokenIdAttr(uint256 _tokenId) public view returns (TokenIdAttr memory) {
+    function getTokenIdAttr(uint256 _tokenId) public virtual view returns (TokenIdAttr memory) {
         return tokenIdData[_tokenId];
     }
 
-    function getUserPreSaleStatus(address _user, string memory _collectibleName) public view returns (bool) {
+    function getUserPreSaleStatus(address _user, string memory _collectibleName) public virtual view returns (bool) {
         return userPreSaleStatus[_user][collectibleNameToSig[_collectibleName]];
     }
 
-    function getCollectiblesSigs() public view returns (bytes32[] memory) {
+    function getCollectiblesSigs() public virtual view returns (bytes32[] memory) {
         return collectiblesSigs;
     }
 
-    function getQuoteTokens() public view returns (address[] memory) {
+    function getQuoteTokens() public virtual view returns (address[] memory) {
         return quoteTokens;
     }
 
-    function getMinter() public view returns (address) {
+    function getMinter() public virtual view returns (address) {
         return minter;
     }
 
-    function getMintingFeeAddress() public view returns (address) {
+    function getMintingFeeAddress() public virtual view returns (address) {
         return mintingFeeAddress;
     }
 
-    function getUserMintRequest(address _user) public view returns (TokenIdAttr[] memory) {
+    function getUserMintRequest(address _user) public virtual view returns (TokenIdAttr[] memory) {
         return userMintRequests[_user];
     }
 
-    function getMintRequests() public view returns (address[] memory) {
+    function getMintRequests() public virtual view returns (address[] memory) {
         return mintRequests;
     }
 
@@ -383,7 +384,7 @@ contract LaqiraceCollectibles is ERC721Enumerable, Ownable {
     function delStructFromArray(
         uint256 i,
         TokenIdAttr[] storage array
-    ) internal {
+    ) internal virtual {
         uint256 len = array.length;
         for (i; i < len - 1; i++) {
             array[i] = array[i + 1];
